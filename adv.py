@@ -29,6 +29,43 @@ player = Player(world.starting_room)
 # traversal_path = ['n', 'n']
 traversal_path = []
 
+Checked = {}
+list = []
+exited = player.current_room.get_exits()
+temp = {}
+for i in range(len(exited)):
+    temp.update({exited[i]: '?'})
+Checked[player.current_room.id] = temp
+
+while len(Checked) < len(room_graph) - 1:
+    if player.current_room.id not in Checked:
+        temp = {}
+        exited = player.current_room.get_exits()
+        for i in range(len(exited)):
+            temp.update({exited[i]: '?'})
+        Checked[player.current_room.id] = temp
+        Checked[player.current_room.id][list[-1]] = player.current_room.get_room_in_direction(list[-1])
+    current_path = []
+    for exit_path, room in Checked[player.current_room.id].items():
+        if room == '?': current_path.append(exit_path)
+
+    while len(current_path) == 0 and len(list) > 0:
+        reversed_direction = list.pop()
+        traversal_path.append(reversed_direction)
+        player.travel(reversed_direction)
+        new_paths = []
+        for exit_path, room in Checked[player.current_room.id].items():
+            if room == '?':
+                new_paths.append(exit_path)
+        current_path = new_paths
+
+    Checked[player.current_room.id][current_path[-1]] = player.current_room.get_room_in_direction(current_path[-1])
+    move = current_path.pop()
+    traversal_path.append(move)
+    opposites = {'n': 's', 's': 'n', 'w': 'e', 'e': 'w'}
+    list.append(opposites[move])
+    player.travel(move)
+
 
 
 # TRAVERSAL TEST - DO NOT MODIFY
